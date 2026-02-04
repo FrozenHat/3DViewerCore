@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced 3D Viewer Setup</title>
+    <script src="../dist/viewer.bundle.js"></script>
+    <style>
+        body { margin: 0; }
+        #viewer { width: 100%; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="viewer"></div>
+    <script>
+        const viewer = new Viewer();
+        viewer.init({
+            container: document.getElementById('viewer'),
+            modelUrl: 'path/to/your/model.glb',
+            animationUrl: 'path/to/your/animation.json',
+            onPartSelected: (part) => {
+                console.log('Selected part:', part);
+            }
+        });
+
+        viewer.loadModel();
+        viewer.render();
+    </script>
+</body>
+</html>
