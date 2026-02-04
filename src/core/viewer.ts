@@ -7,7 +7,9 @@ import { AnimationLoader } from '../loaders/animationLoader';
 import { AnimationPanel } from '../ui/animationPanel';
 import { Timeline } from '../ui/timeline';
 import { DetailCard } from '../ui/detailCard';
-import { PartMetadata } from '../types';
+import { LightingManager } from '../utils/lightingManager';
+import { ViewerConfig, LightConfig, PartMetadata } from '../types'; // ✅ ДОБАВИТЬ
+import { defaultConfig } from '../config/defaultConfig';
 
 export class Viewer {
   private containerId: string;
@@ -40,9 +42,70 @@ export class Viewer {
   private hoverColor = new THREE.Color(0x667eea);
   private selectColor = new THREE.Color(0x3cb371);
 
-  constructor(containerId: string) {
+  private config: ViewerConfig;
+  private lightingManager: LightingManager | null = null;
+  private pauseOnFocus: boolean = true;
+  private wasPlayingBeforeFocus: boolean = false;
+
+  constructor(containerId: string, config?: Partial<ViewerConfig>) {
     this.containerId = containerId;
-    console.log('Viewer constructor called');
+    
+    // ✅ Безопасное слияние с проверками
+    this.config = {
+      containerId,
+      enableSelection: config?.enableSelection ?? defaultConfig.enableSelection,
+      enableUI: config?.enableUI ?? defaultConfig.enableUI,
+      
+      lighting: {
+        ambient: {
+          enabled: config?.lighting?.ambient?.enabled ?? defaultConfig.lighting?.ambient?.enabled ?? true,
+          color: config?.lighting?.ambient?.color ?? defaultConfig.lighting?.ambient?.color ?? 0xffffff,
+          intensity: config?.lighting?.ambient?.intensity ?? defaultConfig.lighting?.ambient?.intensity ?? 1.0
+        },
+        directional: {
+          enabled: config?.lighting?.directional?.enabled ?? defaultConfig.lighting?.directional?.enabled ?? true,
+          color: config?.lighting?.directional?.color ?? defaultConfig.lighting?.directional?.color ?? 0xffffff,
+          intensity: config?.lighting?.directional?.intensity ?? defaultConfig.lighting?.directional?.intensity ?? 1.0,
+          position: {
+            x: 0,
+            y: 0,
+            z: 0
+          },
+          castShadow: false
+        },
+        point: config?.lighting?.point,
+        spot: config?.lighting?.spot
+      },
+      
+      hdri: {
+        enabled: config?.hdri?.enabled ?? defaultConfig.hdri?.enabled ?? false,
+        url: config?.hdri?.url ?? defaultConfig.hdri?.url ?? '',
+        intensity: config?.hdri?.intensity ?? defaultConfig.hdri?.intensity ?? 1.0,
+        background: config?.hdri?.background ?? defaultConfig.hdri?.background ?? false
+      },
+      
+      camera: {
+        fov: config?.camera?.fov ?? defaultConfig.camera?.fov ?? 75,
+        near: config?.camera?.near ?? defaultConfig.camera?.near ?? 0.1,
+        far: config?.camera?.far ?? defaultConfig.camera?.far ?? 1000,
+        position: config?.camera?.position ?? defaultConfig.camera?.position ?? { x: 5, y: 5, z: 5 }
+      },
+      
+      renderer: {
+        antialias: config?.renderer?.antialias ?? defaultConfig.renderer?.antialias ?? true,
+        shadowMap: config?.renderer?.shadowMap ?? defaultConfig.renderer?.shadowMap ?? true,
+        toneMapping: config?.renderer?.toneMapping ?? defaultConfig.renderer?.toneMapping ?? true
+      },
+      
+      animations: {
+        pauseOnFocus: config?.animations?.pauseOnFocus ?? defaultConfig.animations?.pauseOnFocus ?? true,
+        configs: config?.animations?.configs ?? defaultConfig.animations?.configs ?? []
+      }
+    };
+
+    this.pauseOnFocus = this.config.animations?.pauseOnFocus ?? true;
+    
+    console.log('🎬 Viewer создан с конфигурацией:', this.config);
   }
 
   public init(): void {
@@ -59,11 +122,26 @@ export class Viewer {
     this.scene = new THREE.Scene();
     console.log('3. Scene created');
 
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(5, 5, 5);
-    console.log('4. Camera created');
+    // Камера с настройками из конфига
+    this.camera = new THREE.PerspectiveCamera(
+      this.config.camera?.fov ?? 75,
+      width / height,
+      this.config.camera?.near ?? 0.1,
+      this.config.camera?.far ?? 1000
+    );
+    
+    const camPos = this.config.camera?.position ?? { x: 5, y: 5, z: 5 };
+    this.camera.position.set(camPos.x, camPos.y, camPos.z);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ 
+      antialias: this.config.renderer?.antialias ?? true 
+    });
+    
+    if (this.config.renderer?.shadowMap) {
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
+
     console.log('5. Renderer created');
 
     this.renderer.setSize(width, height);
@@ -87,6 +165,27 @@ export class Viewer {
     this.controls = new Controls(this.camera, this.renderer.domElement);
     this.partSelection = new PartSelection(this.camera, this.renderer.domElement, this.scene);
     this.cameraFocus = new CameraFocus(this.camera, this.controls.getOrbitControls());
+
+    // Инициализация освещения
+    this.lightingManager = new LightingManager(this.scene, this.renderer);
+    
+    if (this.config.lighting) {
+        this.lightingManager.applyLightConfig(this.config.lighting);
+    }
+
+    // ✅ HDRI загружается АСИНХРОННО
+    if (this.config.hdri?.enabled && this.config.hdri?.url) {
+        console.log('🌅 Загрузка HDRI:', this.config.hdri.url);
+        this.lightingManager.loadHDRI(this.config.hdri)
+            .then(() => {
+                console.log('✅ HDRI загружен успешно');
+            })
+            .catch((error) => {
+                console.error('❌ Ошибка загрузки HDRI:', error);
+            });
+    } else {
+        console.log('⚠️ HDRI отключен или URL не указан');
+    }
 
     // Инициализация UI
     this.initUI();
@@ -139,9 +238,13 @@ export class Viewer {
       this.playAnimation(name);
     });
 
-    // Play/Pause
+    // Play/Pause с учётом фокуса
     this.animationPanel?.onPlay(() => {
-      this.togglePlayPause();
+      if (this.wasPlayingBeforeFocus && !this.isPlaying) {
+        this.resumeAnimation();
+      } else {
+        this.togglePlayPause();
+      }
     });
 
     // Reset
@@ -473,7 +576,63 @@ export class Viewer {
 
   private handleSingleClick(object: THREE.Object3D): void {
     console.log('👆 Одинарный клик:', object.name);
+    
+    // Пауза при фокусе (если включено)
+    if (this.pauseOnFocus && this.isPlaying) {
+      this.wasPlayingBeforeFocus = true;
+      this.stopAnimation();
+      console.log('⏸️ Анимация остановлена для фокуса');
+    }
+    
     this.cameraFocus?.focusOn(object);
+  }
+
+  /**
+   * Возобновление анимации после фокуса
+   */
+  public resumeAnimation(): void {
+    if (this.wasPlayingBeforeFocus) {
+      this.togglePlayPause();
+      this.wasPlayingBeforeFocus = false;
+      console.log('▶️ Анимация возобновлена после фокуса');
+    }
+  }
+
+  /**
+   * Обновление освещения
+   */
+  public updateLighting(config: LightConfig): void {
+    if (!this.lightingManager) {
+      console.warn('⚠️ LightingManager не инициализирован');
+      return;
+    }
+    
+    console.log('💡 Обновление освещения:', config);
+    this.lightingManager.applyLightConfig(config);
+  }
+
+  /**
+   * Загрузка HDRI
+   */
+  public async loadHDRI(url: string, intensity: number = 1.0, background: boolean = false): Promise<void> {
+    if (!this.lightingManager) {
+      console.warn('⚠️ LightingManager не инициализирован');
+      return;
+    }
+    
+    await this.lightingManager.loadHDRI({
+      enabled: true,
+      url,
+      intensity,
+      background
+    });
+  }
+
+  private clearSelection(): void {
+    console.log('🔄 Сброс выбора');
+    this.detailCard?.hide();
+    this.cameraFocus?.reset();
+    this.setSelectedObject(null);
   }
 
   private handleDoubleClick(object: THREE.Object3D): void {
@@ -491,13 +650,5 @@ export class Viewer {
 
     console.log('📋 Открытие карточки с метаданными:', metadata);
     this.detailCard?.show(metadata);
-    console.log('📋 Карточка должна быть видна');
-  }
-
-  private clearSelection(): void {
-    console.log('🔄 Сброс выбора');
-    this.detailCard?.hide();
-    this.cameraFocus?.reset();
-    this.setSelectedObject(null);
   }
 }

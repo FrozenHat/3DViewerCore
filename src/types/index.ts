@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export interface Model {
     id: string;
     name: string;
@@ -32,21 +34,85 @@ export interface PartMetadata {
     groupId?: string;
 }
 
+export interface LightConfig {
+    ambient?: {
+        enabled: boolean;
+        color: number;
+        intensity: number;
+    };
+    directional?: {
+        enabled: boolean;
+        color: number;
+        intensity: number;
+        position: { x: number; y: number; z: number };
+        castShadow: boolean;
+    };
+    point?: {
+        enabled: boolean;
+        color: number;
+        intensity: number;
+        position: { x: number; y: number; z: number };
+        distance: number;
+    };
+    spot?: {
+        enabled: boolean;
+        color: number;
+        intensity: number;
+        position: { x: number; y: number; z: number };
+        angle: number;
+        penumbra: number;
+    };
+}
+
+// ✅ Делаем все поля optional
+export interface HDRIConfig {
+    enabled?: boolean;
+    url?: string;
+    intensity?: number;
+    background?: boolean;
+}
+
 export interface AnimationConfig {
     name: string;
     displayName: string;
-    duration: number;
-    loop: boolean;
+    pauseOnFocus?: boolean;
+    loop?: boolean;
 }
 
 export enum AnimationType {
-    ASSEMBLY = 'assembly',      // Разбор/сбор
-    OPERATION = 'operation'     // Принцип действия
+    ASSEMBLY = 'assembly',
+    OPERATION = 'operation',
+    CUSTOM = 'custom'
 }
 
 export interface ViewerConfig {
     containerId: string;
-    animations?: AnimationConfig[];
     enableSelection?: boolean;
     enableUI?: boolean;
+    
+    lighting?: LightConfig;
+    hdri?: HDRIConfig;
+    
+    animations?: {
+        pauseOnFocus?: boolean; // ✅ optional
+        configs?: AnimationConfig[]; // ✅ optional
+    };
+    
+    camera?: {
+        fov?: number; // ✅ optional
+        near?: number;
+        far?: number;
+        position?: { x: number; y: number; z: number };
+    };
+    
+    renderer?: {
+        antialias?: boolean; // ✅ optional
+        shadowMap?: boolean;
+        toneMapping?: boolean;
+    };
+}
+
+export interface LoadedAnimation {
+    clip: THREE.AnimationClip;
+    action?: THREE.AnimationAction;
 }

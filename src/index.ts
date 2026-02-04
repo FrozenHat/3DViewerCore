@@ -1,24 +1,68 @@
 import { Viewer } from './core/viewer';
-import { EmbedAPI } from './api/embedAPI';
-import { ModelLoader } from './loaders/modelLoader';
-import './styles/viewer.css';
+import { Controls } from './interactions/controls';
+import { PartSelection } from './interactions/partSelection';
+import { CameraFocus } from './interactions/cameraFocus';
+import { AnimationLoader } from './loaders/animationLoader';
+import { AnimationPanel } from './ui/animationPanel';
+import { Timeline } from './ui/timeline';
+import { DetailCard } from './ui/detailCard';
+import { LightingManager } from './utils/lightingManager';
 
-const ViewerLib = {
-  Viewer,
-  EmbedAPI,
-  ModelLoader
+// Экспорт типов
+export * from './types';
+
+// Экспорт конфигов
+export { defaultConfig } from './config/defaultConfig';
+export { 
+    studioPreset, 
+    outdoorPreset, 
+    darkPreset, 
+    minimalPreset 
+} from './config/presets';
+
+// Экспорт классов
+export {
+    Viewer,
+    Controls,
+    PartSelection,
+    CameraFocus,
+    AnimationLoader,
+    AnimationPanel,
+    Timeline,
+    DetailCard,
+    LightingManager
 };
 
-export default ViewerLib;
-export { Viewer, EmbedAPI, ModelLoader };
+// Импортируем пресеты
+import { defaultConfig } from './config/defaultConfig';
+import { studioPreset, outdoorPreset, darkPreset, minimalPreset } from './config/presets';
 
-// Экспортируем в глобальное окно
-declare global {
-  interface Window {
-    Viewer: typeof Viewer;
-  }
-}
+// Глобальный объект для браузера
+const ViewerLib = {
+    Viewer,
+    Controls,
+    PartSelection,
+    CameraFocus,
+    AnimationLoader,
+    AnimationPanel,
+    Timeline,
+    DetailCard,
+    LightingManager,
+    defaultConfig,
+    studioPreset,
+    outdoorPreset,
+    darkPreset,
+    minimalPreset
+};
 
+// @ts-ignore
 if (typeof window !== 'undefined') {
-  window.Viewer = Viewer;
+    // @ts-ignore
+    window.Viewer = Viewer;
+    // @ts-ignore
+    window.ViewerLib = ViewerLib;
+    
+    console.log('✅ ViewerLib экспортирован в window:', Object.keys(ViewerLib));
 }
+
+export default ViewerLib;
