@@ -9,12 +9,42 @@ import { ViewerConfig } from './types';
 interface ViewerConfigJSON {
     containerId: string;
     modelUrl?: string;
-    preset?: 'default' | 'studio' | 'outdoor' | 'dark' | 'minimal';
+    preset?: PresetType;
     enableSelection?: boolean;
     enableUI?: boolean;
     customLighting?: any;
     customCamera?: any;
     customRenderer?: any;
+}
+
+/**
+ * Допустимые типы пресетов
+ */
+type PresetType = 'default' | 'studio' | 'outdoor' | 'dark' | 'minimal';
+
+/**
+ * Получить конфигурацию по имени пресета
+ * @param presetName - Имя пресета
+ * @returns Конфигурация viewer
+ */
+function getPresetConfig(presetName?: PresetType): Partial<ViewerConfig> {
+    switch(presetName) {
+        case 'studio':
+            console.log('🎨 Применён пресет: Studio');
+            return { ...studioPreset };
+        case 'outdoor':
+            console.log('🎨 Применён пресет: Outdoor');
+            return { ...outdoorPreset };
+        case 'dark':
+            console.log('🎨 Применён пресет: Dark');
+            return { ...darkPreset };
+        case 'minimal':
+            console.log('🎨 Применён пресет: Minimal');
+            return { ...minimalPreset };
+        default:
+            console.log('🎨 Применён пресет: Default');
+            return { ...defaultConfig };
+    }
 }
 
 /**
@@ -57,30 +87,8 @@ export async function initFromConfig(configUrl: string): Promise<Viewer | null> 
         const config: ViewerConfigJSON = await response.json();
         console.log('✅ Конфигурация загружена:', config);
         
-        // Выбираем базовый пресет
-        let viewerConfig: Partial<ViewerConfig> = {};
-        
-        switch(config.preset) {
-            case 'studio':
-                viewerConfig = { ...studioPreset };
-                console.log('🎨 Применён пресет: Studio');
-                break;
-            case 'outdoor':
-                viewerConfig = { ...outdoorPreset };
-                console.log('🎨 Применён пресет: Outdoor');
-                break;
-            case 'dark':
-                viewerConfig = { ...darkPreset };
-                console.log('🎨 Применён пресет: Dark');
-                break;
-            case 'minimal':
-                viewerConfig = { ...minimalPreset };
-                console.log('🎨 Применён пресет: Minimal');
-                break;
-            default:
-                viewerConfig = { ...defaultConfig };
-                console.log('🎨 Применён пресет: Default');
-        }
+        // Выбираем базовый пресет используя общую функцию
+        const viewerConfig = getPresetConfig(config.preset);
         
         // Применяем кастомные настройки из конфига
         if (config.enableSelection !== undefined) {
@@ -176,24 +184,15 @@ export async function initFromElement(containerId: string): Promise<Viewer | nul
         const config: ViewerConfigJSON = {
             containerId,
             modelUrl: dataset.model,
-            preset: (dataset.preset as any) || 'default',
+            preset: (dataset.preset as PresetType) || 'default',
             enableSelection: dataset.enableSelection === 'true',
             enableUI: dataset.enableUi === 'true'
         };
         
         console.log('✅ Конфигурация из data-атрибутов:', config);
         
-        // Используем общую функцию инициализации
-        // Создаём временный URL для конфига (используем тот же код)
-        let viewerConfig: Partial<ViewerConfig> = {};
-        
-        switch(config.preset) {
-            case 'studio': viewerConfig = { ...studioPreset }; break;
-            case 'outdoor': viewerConfig = { ...outdoorPreset }; break;
-            case 'dark': viewerConfig = { ...darkPreset }; break;
-            case 'minimal': viewerConfig = { ...minimalPreset }; break;
-            default: viewerConfig = { ...defaultConfig };
-        }
+        // Используем общую функцию для выбора пресета
+        const viewerConfig = getPresetConfig(config.preset);
         
         viewerConfig.enableSelection = config.enableSelection;
         viewerConfig.enableUI = config.enableUI;

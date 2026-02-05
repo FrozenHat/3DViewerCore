@@ -524,17 +524,25 @@ const viewer = new window.Viewer('container', window.ViewerLib.myCustomPreset);
     
     "customLighting": {
         "ambient": {
-            "color": "#ffffff",
+            "color": 16777215,
             "intensity": 0.6
         },
         "directional": {
-            "color": "#ffffff",
+            "color": 16777215,
             "intensity": 1.0,
             "position": [10, 10, 10]
         }
     }
 }
 ```
+
+**Примечание о цветах:** В JSON-конфигурации цвета указываются в десятичном формате (например, 16777215 для белого цвета, что соответствует 0xFFFFFF). В JavaScript-коде вы можете использовать hex формат: `0xffffff`.
+
+Примеры цветов:
+- Белый: 16777215 (0xFFFFFF)
+- Красный: 16711680 (0xFF0000)
+- Зелёный: 65280 (0x00FF00)
+- Синий: 255 (0x0000FF)
 
 ### Шаг 2: Создайте обёртку для автоинициализации
 
