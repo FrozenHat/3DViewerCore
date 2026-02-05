@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Viewer - Auto-init через data-атрибуты</title>
+    <link rel="stylesheet" href="../src/styles/viewer.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .viewer-wrapper {
+            margin-bottom: 30px;
+        }
+        
+        .viewer-wrapper h2 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        [data-viewer] {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .info code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .info pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Автоинициализация через data-атрибуты</h1>
+        <p class="description">
+            Этот пример показывает самый простой способ использования библиотеки.
+            Просто добавьте <code>data-viewer</code> атрибут и настройки, вызовите <code>autoInit()</code> — всё!
+        </p>
+        
+        <!-- Первый viewer с пресетом Studio -->
+        <div class="viewer-wrapper">
+            <h2>🎨 Studio Preset</h2>
+            <div data-viewer
+                 data-model="./models/AnimTestModel3.glb"
+                 data-preset="studio"
+                 data-enable-selection="true"
+                 data-enable-ui="true">
+            </div>
+        </div>
+        
+        <!-- Второй viewer с пресетом Dark -->
+        <div class="viewer-wrapper">
+            <h2>🌙 Dark Preset</h2>
+            <div data-viewer
+                 data-model="./models/AnimTestModel3.glb"
+                 data-preset="dark"
+                 data-enable-selection="true"
+                 data-enable-ui="true">
+            </div>
+        </div>
+        
+        <!-- Третий viewer с пресетом Minimal -->
+        <div class="viewer-wrapper">
+            <h2>⚪ Minimal Preset</h2>
+            <div data-viewer
+                 data-model="./models/AnimTestModel3.glb"
+                 data-preset="minimal"
+                 data-enable-selection="false"
+                 data-enable-ui="false">
+            </div>
+        </div>
+        
+        <div class="info">
+            <h2>🚀 Как использовать</h2>
+            
+            <h3>1. Добавьте HTML-разметку:</h3>
+            <pre>&lt;div data-viewer
+     data-model="./models/model.glb"
+     data-preset="studio"
+     data-enable-selection="true"
+     data-enable-ui="true"&gt;
+&lt;/div&gt;</pre>
+            
+            <h3>2. Подключите библиотеку и вызовите autoInit():</h3>
+            <pre>&lt;script src="./bundle.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    // Автоматически найдёт все [data-viewer] и инициализирует
+    ViewerLib.autoInit();
+&lt;/script&gt;</pre>
+            
+            <h3>Доступные data-атрибуты:</h3>
+            <ul>
+                <li><code>data-viewer</code> — маркер для автопоиска (обязательный)</li>
+                <li><code>data-model</code> — путь к 3D-модели</li>
+                <li><code>data-preset</code> — пресет: default, studio, outdoor, dark, minimal</li>
+                <li><code>data-enable-selection</code> — включить выбор деталей: true/false</li>
+                <li><code>data-enable-ui</code> — показывать UI: true/false</li>
+            </ul>
+            
+            <h3>Преимущества:</h3>
+            <ul>
+                <li>✅ Не нужно писать JavaScript код</li>
+                <li>✅ Можно разместить несколько viewer на одной странице</li>
+                <li>✅ Декларативная настройка через HTML</li>
+                <li>✅ Идеально для CMS и конструкторов сайтов</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Подключение библиотеки -->
+    <script src="../dist/bundle.js"></script>
+    <script>
+        window.addEventListener('load', async () => {
+            try {
+                console.log('🔍 Поиск элементов с [data-viewer]...');
+                
+                // Автоматический поиск и инициализация всех viewers
+                const viewers = await window.ViewerLib.autoInit();
+                
+                console.log(`✅ Инициализировано ${viewers.length} viewers`);
+                
+            } catch (error) {
+                console.error('❌ ОШИБКА:', error);
+            }
+        });
+    </script>
+</body>
+</html>

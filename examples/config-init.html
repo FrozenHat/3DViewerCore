@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Viewer - Инициализация из конфига</title>
+    <link rel="stylesheet" href="../src/styles/viewer.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        #viewer-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .info code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .info pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 3D Viewer с автоматической инициализацией</h1>
+        <p class="description">
+            Этот пример демонстрирует автоматическую инициализацию viewer из JSON-конфига.
+            Просто подключите bundle.js и вызовите initFromConfig()!
+        </p>
+        
+        <!-- Контейнер для 3D-сцены -->
+        <div id="viewer-container"></div>
+        
+        <div class="info">
+            <h2>📋 Как это работает</h2>
+            <p>
+                1. Создан файл <code>viewer-config.json</code> с настройками<br>
+                2. Подключен <code>bundle.js</code><br>
+                3. Вызвана функция <code>ViewerLib.initFromConfig('./viewer-config.json')</code>
+            </p>
+            
+            <h3>Содержимое viewer-config.json:</h3>
+            <pre>{
+  "containerId": "viewer-container",
+  "modelUrl": "./models/AnimTestModel3.glb",
+  "preset": "studio",
+  "enableSelection": true,
+  "enableUI": true,
+  "customLighting": {
+    "ambient": {
+      "enabled": true,
+      "color": 16777215,
+      "intensity": 0.8
+    }
+  }
+}</pre>
+            
+            <h3>Код инициализации:</h3>
+            <pre>&lt;script src="../dist/bundle.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    window.addEventListener('load', () => {
+        ViewerLib.initFromConfig('./viewer-config.json');
+    });
+&lt;/script&gt;</pre>
+        </div>
+    </div>
+    
+    <!-- Подключение библиотеки -->
+    <script src="../dist/bundle.js"></script>
+    <script>
+        window.addEventListener('load', async () => {
+            try {
+                console.log('Начало инициализации из конфига...');
+                
+                // Автоматическая инициализация из конфига
+                const viewer = await window.ViewerLib.initFromConfig('./viewer-config.json');
+                
+                if (viewer) {
+                    console.log('✅ Viewer успешно инициализирован из конфига!');
+                } else {
+                    console.error('❌ Не удалось инициализировать viewer');
+                }
+                
+            } catch (error) {
+                console.error('❌ ОШИБКА:', error);
+            }
+        });
+    </script>
+</body>
+</html>
