@@ -20,6 +20,9 @@ export {
     minimalPreset 
 } from './config/presets';
 
+// Экспорт функций автоинициализации
+export { initFromConfig, initFromElement, autoInit } from './autoInit';
+
 // Экспорт классов
 export {
     Viewer,
@@ -36,6 +39,7 @@ export {
 // Импортируем пресеты
 import { defaultConfig } from './config/defaultConfig';
 import { studioPreset, outdoorPreset, darkPreset, minimalPreset } from './config/presets';
+import { initFromConfig, initFromElement, autoInit } from './autoInit';
 
 // Глобальный объект для браузера
 const ViewerLib = {
@@ -52,7 +56,10 @@ const ViewerLib = {
     studioPreset,
     outdoorPreset,
     darkPreset,
-    minimalPreset
+    minimalPreset,
+    initFromConfig,
+    initFromElement,
+    autoInit
 };
 
 // @ts-ignore

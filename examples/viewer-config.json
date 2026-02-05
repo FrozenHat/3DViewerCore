@@ -1,0 +1,35 @@
+{
+  "containerId": "viewer-container",
+  "modelUrl": "./models/AnimTestModel3.glb",
+  "preset": "studio",
+  "enableSelection": true,
+  "enableUI": true,
+  
+  "customLighting": {
+    "ambient": {
+      "enabled": true,
+      "color": 16777215,
+      "intensity": 0.8
+    },
+    "directional": {
+      "enabled": true,
+      "color": 16777215,
+      "intensity": 1.2,
+      "position": {
+        "x": 10,
+        "y": 15,
+        "z": 10
+      },
+      "castShadow": true
+    }
+  },
+  
+  "customCamera": {
+    "fov": 60,
+    "position": {
+      "x": 5,
+      "y": 5,
+      "z": 5
+    }
+  }
+}
