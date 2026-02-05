@@ -89,6 +89,8 @@ export interface ViewerConfig {
     containerId: string;
     enableSelection?: boolean;
     enableUI?: boolean;
+    panelType?: 'standard' | 'changed' | 'custom';
+    customCssClass?: string; // For "changed" mode
     
     lighting?: LightConfig;
     hdri?: HDRIConfig;
@@ -96,6 +98,7 @@ export interface ViewerConfig {
     animations?: {
         pauseOnFocus?: boolean; // ✅ optional
         configs?: AnimationConfig[]; // ✅ optional
+        autoPlay?: boolean; // ✅ Control autoplay on start
     };
     
     camera?: {

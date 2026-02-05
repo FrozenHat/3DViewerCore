@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Viewer - Changed Panel Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #viewer-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Custom CSS class for changed panel mode */
+        .custom-theme .animation-panel {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #0f3460;
+            box-shadow: 0 8px 32px rgba(15, 52, 96, 0.5);
+        }
+
+        .custom-theme .animation-panel h3 {
+            color: #e94560;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-theme .animation-selector label {
+            color: #e0e0e0;
+        }
+
+        .custom-theme .animation-selector label:hover {
+            color: #e94560;
+        }
+
+        .custom-theme .btn-play {
+            background: #e94560;
+            color: white;
+        }
+
+        .custom-theme .btn-play:hover {
+            background: #d63447;
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.6);
+        }
+
+        .custom-theme .btn-reset {
+            background: #0f3460;
+            color: #e0e0e0;
+        }
+
+        .custom-theme .btn-reset:hover {
+            background: #16213e;
+        }
+
+        .custom-theme .timeline-container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #0f3460;
+            box-shadow: 0 8px 32px rgba(15, 52, 96, 0.5);
+        }
+
+        .custom-theme #time-display {
+            color: #e0e0e0;
+        }
+
+        .custom-theme #timeline-slider::-webkit-slider-thumb {
+            background: #e94560;
+        }
+
+        .custom-theme #timeline-slider::-webkit-slider-thumb:hover {
+            background: #d63447;
+        }
+
+        .custom-theme .detail-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #0f3460;
+            box-shadow: 0 8px 32px rgba(15, 52, 96, 0.5);
+        }
+
+        .custom-theme .card-header {
+            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+        }
+
+        .custom-theme .card-body p {
+            color: #e0e0e0;
+        }
+
+        .custom-theme .metadata h4,
+        .custom-theme .documentation h4 {
+            color: #e94560;
+        }
+
+        .custom-theme .metadata li,
+        .custom-theme .documentation li {
+            color: #c0c0c0;
+            border-bottom-color: #0f3460;
+        }
+
+        .custom-theme .btn-isolate {
+            background: #e94560;
+        }
+
+        .custom-theme .btn-isolate:hover {
+            background: #d63447;
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div id="viewer-container"></div>
+
+    <script src="../dist/bundle.js"></script>
+    <script>
+        // Initialize viewer with "changed" panel mode and custom CSS class
+        const config = {
+            containerId: 'viewer-container',
+            modelUrl: './models/AnimTestModel3.glb',
+            preset: 'studio',
+            enableSelection: true,
+            enableUI: true,
+            panelType: 'changed',
+            customCssClass: 'custom-theme',
+            hdri: {
+                enabled: true,
+                url: './hdri/studio_small_08_1k.hdr',
+                intensity: 1.0,
+                background: true
+            },
+            animations: {
+                autoPlay: false,
+                pauseOnFocus: true
+            }
+        };
+
+        const viewer = new window.Viewer('viewer-container', config);
+        viewer.init();
+        viewer.loadModel(config.modelUrl);
+        viewer.render();
+
+        console.log('✅ Viewer initialized with "changed" panel mode and custom theme');
+    </script>
+</body>
+</html>

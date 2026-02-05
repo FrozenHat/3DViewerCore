@@ -40,7 +40,18 @@ ViewerLib.initFromConfig('./viewer-config.json');
   "modelUrl": "./models/model.glb",
   "preset": "studio",
   "enableSelection": true,
-  "enableUI": true
+  "enableUI": true,
+  "panelType": "standard",
+  "hdri": {
+    "enabled": true,
+    "url": "./hdri/studio_small_08_1k.hdr",
+    "intensity": 1.0,
+    "background": true
+  },
+  "animations": {
+    "autoPlay": false,
+    "pauseOnFocus": true
+  }
 }
 ```
 
@@ -50,11 +61,58 @@ ViewerLib.initFromConfig('./viewer-config.json');
      data-model="./models/model.glb"
      data-preset="studio"
      data-enable-selection="true"
-     data-enable-ui="true">
+     data-enable-ui="true"
+     data-panel-type="standard">
 </div>
 
 <script>ViewerLib.autoInit();</script>
 ```
+
+## Режимы панелей (Panel Types)
+
+### 🎨 Standard (по умолчанию)
+Стандартные встроенные панели UI.
+```json
+{
+  "panelType": "standard"
+}
+```
+
+### 🎨 Changed
+Встроенные панели с кастомным CSS-стилем.
+```json
+{
+  "panelType": "changed",
+  "customCssClass": "custom-theme"
+}
+```
+
+**Пример:** `examples/panel-changed-mode.html`
+
+### 🎨 Custom
+Без встроенного UI. Полный контроль через API.
+```json
+{
+  "panelType": "custom",
+  "enableUI": false
+}
+```
+
+**API методы для Custom режима:**
+```javascript
+viewer.getAnimations()           // Получить список анимаций
+viewer.getCurrentAnimation()     // Текущая анимация
+viewer.getCurrentTime()          // Текущее время
+viewer.getAnimationDuration()    // Длительность анимации
+viewer.isAnimationPlaying()      // Проигрывается ли анимация
+viewer.playAnimation(name)       // Воспроизвести анимацию
+viewer.togglePlayPause()         // Переключить play/pause
+viewer.resetAnimation()          // Сбросить анимацию
+viewer.seekTo(time)              // Перемотать на время
+viewer.setPlaybackSpeed(speed)   // Установить скорость
+```
+
+**Пример:** `examples/panel-custom-mode.html`
 
 ## Доступные пресеты
 
@@ -81,6 +139,19 @@ ViewerLib.minimalPreset
 const customConfig = {
     enableSelection: true,
     enableUI: true,
+    panelType: 'standard',
+    
+    hdri: {
+        enabled: true,
+        url: 'examples/hdri/studio_small_08_1k.hdr',
+        intensity: 1.0,
+        background: true
+    },
+    
+    animations: {
+        autoPlay: false,         // Анимация на паузе по умолчанию
+        pauseOnFocus: true
+    },
     
     lighting: {
         ambient: {

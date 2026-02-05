@@ -12,6 +12,18 @@ interface ViewerConfigJSON {
     preset?: PresetType;
     enableSelection?: boolean;
     enableUI?: boolean;
+    panelType?: 'standard' | 'changed' | 'custom';
+    customCssClass?: string;
+    hdri?: {
+        enabled?: boolean;
+        url?: string;
+        intensity?: number;
+        background?: boolean;
+    };
+    animations?: {
+        autoPlay?: boolean;
+        pauseOnFocus?: boolean;
+    };
     customLighting?: any;
     customCamera?: any;
     customRenderer?: any;
@@ -97,6 +109,30 @@ export async function initFromConfig(configUrl: string): Promise<Viewer | null> 
         
         if (config.enableUI !== undefined) {
             viewerConfig.enableUI = config.enableUI;
+        }
+        
+        if (config.panelType !== undefined) {
+            viewerConfig.panelType = config.panelType;
+        }
+        
+        if (config.customCssClass !== undefined) {
+            viewerConfig.customCssClass = config.customCssClass;
+        }
+        
+        if (config.hdri !== undefined) {
+            viewerConfig.hdri = {
+                ...viewerConfig.hdri,
+                ...config.hdri
+            };
+            console.log('🌅 Применены кастомные настройки HDRI');
+        }
+        
+        if (config.animations !== undefined) {
+            viewerConfig.animations = {
+                ...viewerConfig.animations,
+                ...config.animations
+            };
+            console.log('🎬 Применены кастомные настройки анимаций');
         }
         
         if (config.customLighting) {
@@ -186,7 +222,9 @@ export async function initFromElement(containerId: string): Promise<Viewer | nul
             modelUrl: dataset.model,
             preset: (dataset.preset as PresetType) || 'default',
             enableSelection: dataset.enableSelection === 'true',
-            enableUI: dataset.enableUi === 'true'
+            enableUI: dataset.enableUi === 'true',
+            panelType: (dataset.panelType as 'standard' | 'changed' | 'custom') || 'standard',
+            customCssClass: dataset.customCssClass || ''
         };
         
         console.log('✅ Конфигурация из data-атрибутов:', config);
@@ -196,6 +234,8 @@ export async function initFromElement(containerId: string): Promise<Viewer | nul
         
         viewerConfig.enableSelection = config.enableSelection;
         viewerConfig.enableUI = config.enableUI;
+        viewerConfig.panelType = config.panelType;
+        viewerConfig.customCssClass = config.customCssClass;
         
         const viewer = new Viewer(containerId, viewerConfig);
         viewer.init();

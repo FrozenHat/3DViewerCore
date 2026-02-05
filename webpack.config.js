@@ -32,5 +32,13 @@ module.exports = {
     maxEntrypointSize: 1024000,
     maxAssetSize: 1024000
   },
+  devServer: {
+    static: {
+      directory: path.join(__dirname, './'),
+    },
+    compress: true,
+    port: 8080,
+    open: false
+  },
   devtool: 'source-map'
 };

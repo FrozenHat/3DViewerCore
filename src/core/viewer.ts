@@ -35,6 +35,7 @@ export class Viewer {
   private currentAnimation: string = 'assembly';
   private clickCount: number = 0;
   private clickTimer: any = null;
+  private modelLoadedCallback: (() => void) | null = null;
 
   private hoveredMeshes: Set<THREE.Mesh> = new Set();
   private selectedMeshes: Set<THREE.Mesh> = new Set();
@@ -55,6 +56,8 @@ export class Viewer {
       containerId,
       enableSelection: config?.enableSelection ?? defaultConfig.enableSelection,
       enableUI: config?.enableUI ?? defaultConfig.enableUI,
+      panelType: config?.panelType ?? defaultConfig.panelType,
+      customCssClass: config?.customCssClass ?? defaultConfig.customCssClass,
       
       lighting: {
         ambient: {
@@ -99,7 +102,8 @@ export class Viewer {
       
       animations: {
         pauseOnFocus: config?.animations?.pauseOnFocus ?? defaultConfig.animations?.pauseOnFocus ?? true,
-        configs: config?.animations?.configs ?? defaultConfig.animations?.configs ?? []
+        configs: config?.animations?.configs ?? defaultConfig.animations?.configs ?? [],
+        autoPlay: config?.animations?.autoPlay ?? defaultConfig.animations?.autoPlay ?? false
       }
     };
 
@@ -114,6 +118,17 @@ export class Viewer {
       throw new Error(`Container with id "${this.containerId}" not found`);
     }
     console.log('1. Container found:', this.container);
+
+    // Apply custom CSS class if panel type is "changed"
+    if (this.config.panelType === 'changed' && this.config.customCssClass) {
+      this.container.classList.add(this.config.customCssClass);
+      console.log(`✅ Applied custom CSS class: ${this.config.customCssClass}`);
+    }
+
+    // Ensure container is positioned relatively for UI elements
+    if (getComputedStyle(this.container).position === 'static') {
+      this.container.style.position = 'relative';
+    }
 
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
@@ -187,8 +202,13 @@ export class Viewer {
         console.log('⚠️ HDRI отключен или URL не указан');
     }
 
-    // Инициализация UI
-    this.initUI();
+    // Инициализация UI (only if panelType is not "custom")
+    if (this.config.panelType !== 'custom') {
+      this.initUI();
+    }
+
+    // Add resize handler
+    this.setupResizeHandler();
 
     console.log('Viewer initialized successfully');
   }
@@ -313,11 +333,21 @@ export class Viewer {
             
             console.log('🎬 Анимации загружены:', gltf.animations.map(a => a.name));
             
-            // ✅ Автозапуск первой анимации
-            this.playAnimation('assembly');
+            // ✅ Autoplay только если включено в конфиге
+            if (this.config.animations?.autoPlay) {
+              this.playAnimation('assembly');
+              console.log('▶️ Autoplay enabled - starting animation');
+            } else {
+              console.log('⏸️ Autoplay disabled - animation paused');
+            }
           }
           
           this.fitCameraToModel(gltf.scene);
+          
+          // Call the model loaded callback if set
+          if (this.modelLoadedCallback) {
+            this.modelLoadedCallback();
+          }
         }
       },
       (progress) => {
@@ -572,6 +602,136 @@ export class Viewer {
     if (this.mixer) {
       this.mixer.stopAllAction();
     }
+  }
+
+  /**
+   * Setup window resize handler
+   */
+  private setupResizeHandler(): void {
+    const resizeObserver = new ResizeObserver(() => {
+      this.onResize();
+    });
+    
+    if (this.container) {
+      resizeObserver.observe(this.container);
+    }
+  }
+
+  /**
+   * Handle container resize
+   */
+  private onResize(): void {
+    if (!this.container || !this.camera || !this.renderer) return;
+
+    const width = this.container.clientWidth;
+    const height = this.container.clientHeight;
+
+    // Update camera aspect ratio
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    // Update renderer size
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+
+    console.log(`📐 Canvas resized to ${width}x${height}`);
+  }
+
+  /**
+   * Set callback to be called when model is loaded
+   */
+  public onModelLoaded(callback: () => void): void {
+    this.modelLoadedCallback = callback;
+  }
+
+  /**
+   * API Methods for Custom Panel Mode
+   * These methods allow external UI to control the viewer
+   */
+
+  /**
+   * Get list of available animations
+   */
+  public getAnimations(): Array<{ name: string; duration: number }> {
+    if (!this.animationLoader) return [];
+    
+    const animations = Array.from(this.animationLoader.getAllAnimations().values());
+    return animations.map(anim => ({
+      name: anim.clip.name,
+      duration: anim.clip.duration
+    }));
+  }
+
+  /**
+   * Get current animation name
+   */
+  public getCurrentAnimation(): string {
+    return this.currentAnimation;
+  }
+
+  /**
+   * Get current animation time
+   */
+  public getCurrentTime(): number {
+    return this.mixer?.time ?? 0;
+  }
+
+  /**
+   * Get animation duration
+   */
+  public getAnimationDuration(name?: string): number {
+    if (!this.animationLoader) return 0;
+    
+    const animName = name || this.currentAnimation;
+    const animation = this.animationLoader.getAnimation(animName);
+    return animation?.clip.duration ?? 0;
+  }
+
+  /**
+   * Check if animation is playing
+   */
+  public isAnimationPlaying(): boolean {
+    return this.isPlaying;
+  }
+
+  /**
+   * Seek to specific time in animation
+   */
+  public seekTo(time: number): void {
+    if (this.mixer) {
+      this.mixer.setTime(time);
+      this.timeline?.setCurrentTime(time);
+    }
+  }
+
+  /**
+   * Set playback speed
+   */
+  public setPlaybackSpeed(speed: number): void {
+    if (this.mixer) {
+      this.mixer.timeScale = speed;
+    }
+  }
+
+  /**
+   * Get scene for advanced manipulation
+   */
+  public getScene(): THREE.Scene | null {
+    return this.scene;
+  }
+
+  /**
+   * Get camera for advanced manipulation
+   */
+  public getCamera(): THREE.PerspectiveCamera | null {
+    return this.camera;
+  }
+
+  /**
+   * Get renderer for advanced manipulation
+   */
+  public getRenderer(): THREE.WebGLRenderer | null {
+    return this.renderer;
   }
 
   private handleSingleClick(object: THREE.Object3D): void {
