@@ -4,6 +4,19 @@
   "preset": "studio",
   "enableSelection": true,
   "enableUI": true,
+  "panelType": "standard",
+  
+  "hdri": {
+    "enabled": true,
+    "url": "./hdri/studio_small_08_1k.hdr",
+    "intensity": 1.0,
+    "background": true
+  },
+  
+  "animations": {
+    "autoPlay": false,
+    "pauseOnFocus": true
+  },
   
   "customLighting": {
     "ambient": {

@@ -4,10 +4,13 @@ export const defaultConfig: ViewerConfig = {
     containerId: 'container',
     enableSelection: true,
     enableUI: true,
+    panelType: 'standard',
+    customCssClass: '',
     
     animations: {
         pauseOnFocus: true,
-        configs: []
+        configs: [],
+        autoPlay: false
     },
     
     lighting: {
@@ -26,10 +29,10 @@ export const defaultConfig: ViewerConfig = {
     },
     
     hdri: {
-        enabled: false,
-        url: '',
+        enabled: true,
+        url: 'examples/hdri/studio_small_08_1k.hdr',
         intensity: 1.0,
-        background: false
+        background: true
     },
     
     camera: {
