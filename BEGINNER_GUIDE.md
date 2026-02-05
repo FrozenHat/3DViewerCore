@@ -152,6 +152,19 @@ export const defaultConfig: ViewerConfig = {
     containerId: 'container',        // ID HTML-элемента
     enableSelection: true,            // Включить выбор деталей
     enableUI: true,                   // Показывать интерфейс
+    panelType: 'standard',            // Режим панелей: standard/changed/custom
+    
+    hdri: {
+        enabled: true,                // HDRI включён по умолчанию
+        url: 'examples/hdri/studio_small_08_1k.hdr',
+        intensity: 1.0,
+        background: true              // Показывать как фон
+    },
+    
+    animations: {
+        autoPlay: false,              // Анимация на паузе по умолчанию
+        pauseOnFocus: true
+    },
     
     lighting: {
         ambient: {
@@ -182,6 +195,12 @@ export const defaultConfig: ViewerConfig = {
     }
 };
 ```
+
+**Важные изменения в конфигурации:**
+- ✅ **HDRI включён по умолчанию** — реалистичное студийное освещение
+- ✅ **Анимация стартует на паузе** — autoPlay: false по умолчанию
+- ✅ **Автоматический resize** — canvas подстраивается под размер контейнера
+- ✅ **Три режима панелей** — standard, changed, custom
 
 ### 2. Пресеты (`config/presets.ts`)
 
@@ -245,6 +264,94 @@ const myConfig = {
 
 const viewer = new Viewer('container', myConfig);
 ```
+
+---
+
+## Режимы панелей (Panel Modes)
+
+Библиотека предлагает три режима работы с UI-панелями, чтобы удовлетворить различные потребности:
+
+### 1. **Standard** — стандартный режим (по умолчанию)
+
+Используются встроенные панели UI (панель анимации, таймлайн, карточка детали).
+
+```javascript
+const viewer = new Viewer('container', {
+    panelType: 'standard'
+});
+```
+
+**Когда использовать:**
+- Вам нужен готовый UI без дополнительных настроек
+- Стандартный дизайн панелей вас устраивает
+- Быстрая интеграция без создания собственного интерфейса
+
+### 2. **Changed** — стандартные панели с кастомным стилем
+
+Панели те же, но вы можете применить свой CSS-класс для изменения стиля.
+
+```javascript
+const viewer = new Viewer('container', {
+    panelType: 'changed',
+    customCssClass: 'custom-theme'  // Ваш CSS-класс
+});
+```
+
+**Пример кастомного CSS:**
+```css
+.custom-theme .animation-panel {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #0f3460;
+}
+
+.custom-theme .btn-play {
+    background: #e94560;
+}
+```
+
+**Когда использовать:**
+- Нужно изменить цвета и стили панелей
+- Хотите адаптировать UI под дизайн вашего сайта
+- Не хотите создавать UI с нуля
+
+**Пример:** `examples/panel-changed-mode.html`
+
+### 3. **Custom** — полный контроль через API
+
+Панели не создаются автоматически. Вы создаёте свой UI и управляете viewer через API.
+
+```javascript
+const viewer = new Viewer('container', {
+    panelType: 'custom',
+    enableUI: false  // Отключить встроенный UI
+});
+
+// Используйте API для управления:
+viewer.getAnimations();           // Получить список анимаций
+viewer.playAnimation('assembly'); // Запустить анимацию
+viewer.togglePlayPause();         // Play/Pause
+viewer.seekTo(5.0);              // Перемотать на 5 секунд
+viewer.setPlaybackSpeed(2.0);    // Скорость x2
+```
+
+**Доступные методы API:**
+- `getAnimations()` — список анимаций
+- `getCurrentAnimation()` — текущая анимация
+- `getCurrentTime()` — текущее время
+- `getAnimationDuration()` — длительность
+- `isAnimationPlaying()` — проигрывается ли
+- `playAnimation(name)` — воспроизвести
+- `togglePlayPause()` — переключить play/pause
+- `resetAnimation()` — сбросить
+- `seekTo(time)` — перемотать
+- `setPlaybackSpeed(speed)` — скорость
+
+**Когда использовать:**
+- Вам нужен полностью кастомный UI
+- Интеграция в существующий интерфейс
+- Специфические требования к расположению элементов
+
+**Пример:** `examples/panel-custom-mode.html`
 
 ---
 

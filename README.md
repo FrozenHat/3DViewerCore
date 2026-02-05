@@ -10,9 +10,15 @@ The 3D Viewer Core is a compact, embeddable solution designed for rendering comp
 
 ## Features
 - **3D Model Rendering**: Load and display complex mechanical models in various formats.
-- **Animations**: Support for model animations, allowing for dynamic presentations.
+- **Animations**: Support for model animations with configurable autoplay (default: paused).
 - **Interactive Part Selection**: Users can interactively select and highlight parts of the model.
 - **Customizable Controls**: Manage user input for navigating the 3D scene.
+- **HDRI Lighting**: Built-in HDRI support with studio lighting by default.
+- **Responsive Canvas**: Automatic canvas resizing to fit container dimensions.
+- **Flexible UI Modes**: Three panel modes for different use cases:
+  - **Standard**: Built-in UI panels (default)
+  - **Changed**: Built-in panels with custom CSS styling
+  - **Custom**: No built-in UI, full API control for external panels
 - **Simple API**: Easy integration into web applications with a straightforward API.
 - **Auto-initialization**: Multiple ways to initialize viewers with minimal code.
 - **Presets**: Pre-configured lighting and rendering presets (Studio, Outdoor, Dark, Minimal).
@@ -75,7 +81,18 @@ Create a `viewer-config.json`:
   "modelUrl": "./models/model.glb",
   "preset": "studio",
   "enableSelection": true,
-  "enableUI": true
+  "enableUI": true,
+  "panelType": "standard",
+  "hdri": {
+    "enabled": true,
+    "url": "./hdri/studio_small_08_1k.hdr",
+    "intensity": 1.0,
+    "background": true
+  },
+  "animations": {
+    "autoPlay": false,
+    "pauseOnFocus": true
+  }
 }
 ```
 
@@ -93,13 +110,91 @@ Initialize from config:
      data-model="./models/model.glb"
      data-preset="studio"
      data-enable-selection="true"
-     data-enable-ui="true">
+     data-enable-ui="true"
+     data-panel-type="standard">
 </div>
 
 <script src="./dist/bundle.js"></script>
 <script>
     ViewerLib.autoInit();
 </script>
+```
+
+## Panel Modes
+
+The viewer supports three different panel modes to accommodate various integration scenarios:
+
+### Standard Mode (Default)
+Uses built-in UI panels for animation control, timeline, and part details.
+```javascript
+{
+  "panelType": "standard"
+}
+```
+
+### Changed Mode
+Uses built-in panels but allows custom CSS styling via a custom class.
+```javascript
+{
+  "panelType": "changed",
+  "customCssClass": "custom-theme"
+}
+```
+
+Example: See `examples/panel-changed-mode.html` for a dark theme implementation.
+
+### Custom Mode
+No built-in UI panels. You control everything via the API.
+```javascript
+{
+  "panelType": "custom",
+  "enableUI": false
+}
+```
+
+#### Available API Methods for Custom Mode:
+- `getAnimations()` - Get list of available animations
+- `getCurrentAnimation()` - Get current animation name
+- `getCurrentTime()` - Get current playback time
+- `getAnimationDuration(name?)` - Get animation duration
+- `isAnimationPlaying()` - Check if animation is playing
+- `playAnimation(name)` - Play specific animation
+- `togglePlayPause()` - Toggle play/pause state
+- `resetAnimation()` - Reset animation to start
+- `seekTo(time)` - Seek to specific time
+- `setPlaybackSpeed(speed)` - Set playback speed multiplier
+
+Example: See `examples/panel-custom-mode.html` for a complete custom UI implementation.
+
+## Configuration Options
+
+### Default Configuration
+The viewer comes with sensible defaults including:
+- **HDRI**: Enabled by default with studio lighting (`examples/hdri/studio_small_08_1k.hdr`)
+- **Animations**: Start paused (autoPlay: false)
+- **Responsive**: Automatically resizes with container
+- **UI**: Standard panels enabled by default
+
+### Animation Configuration
+```javascript
+{
+  "animations": {
+    "autoPlay": false,      // Start paused (default)
+    "pauseOnFocus": true    // Pause when focusing on a part
+  }
+}
+```
+
+### HDRI Configuration
+```javascript
+{
+  "hdri": {
+    "enabled": true,                              // Enable HDRI lighting
+    "url": "examples/hdri/studio_small_08_1k.hdr", // HDRI file path
+    "intensity": 1.0,                              // Light intensity
+    "background": true                             // Show as background
+  }
+}
 ```
 
 ## Examples
@@ -110,15 +205,19 @@ Initialize from config:
 - `examples/config-init.html` - Config-based initialization
 - `examples/auto-init.html` - Auto-initialization with data attributes
 
+### Panel Mode Examples
+- `examples/panel-changed-mode.html` - Custom CSS styling with changed mode
+- `examples/panel-custom-mode.html` - Full custom UI implementation
+
 ### Available Presets
 - **default** - Balanced lighting for general use
-- **studio** - Soft, balanced studio lighting
+- **studio** - Soft, balanced studio lighting with HDRI
 - **outdoor** - Bright, natural outdoor lighting
 - **dark** - Dark scene with accent lighting
 - **minimal** - Minimal ambient-only lighting
 
 ## API Documentation
-The API provides methods for initializing the viewer, loading models, and setting viewer options. For detailed API usage, refer to the `src/api/embedAPI.ts` file.
+The API provides methods for initializing the viewer, loading models, controlling animations, and setting viewer options. For detailed API usage, refer to the `src/core/viewer.ts` file.
 
 ## Project Structure
 ```
