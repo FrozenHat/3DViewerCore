@@ -35,6 +35,7 @@ export class Viewer {
   private currentAnimation: string = 'assembly';
   private clickCount: number = 0;
   private clickTimer: any = null;
+  private modelLoadedCallback: (() => void) | null = null;
 
   private hoveredMeshes: Set<THREE.Mesh> = new Set();
   private selectedMeshes: Set<THREE.Mesh> = new Set();
@@ -342,6 +343,11 @@ export class Viewer {
           }
           
           this.fitCameraToModel(gltf.scene);
+          
+          // Call the model loaded callback if set
+          if (this.modelLoadedCallback) {
+            this.modelLoadedCallback();
+          }
         }
       },
       (progress) => {
@@ -632,6 +638,13 @@ export class Viewer {
   }
 
   /**
+   * Set callback to be called when model is loaded
+   */
+  public onModelLoaded(callback: () => void): void {
+    this.modelLoadedCallback = callback;
+  }
+
+  /**
    * API Methods for Custom Panel Mode
    * These methods allow external UI to control the viewer
    */
@@ -667,6 +680,8 @@ export class Viewer {
    * Get animation duration
    */
   public getAnimationDuration(name?: string): number {
+    if (!this.animationLoader) return 0;
+    
     const animName = name || this.currentAnimation;
     const animation = this.animationLoader.getAnimation(animName);
     return animation?.clip.duration ?? 0;

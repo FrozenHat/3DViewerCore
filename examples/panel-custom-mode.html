@@ -202,8 +202,8 @@
         const durationSpan = document.getElementById('duration');
         const statusSpan = document.getElementById('status');
 
-        // Wait for model to load, then populate controls
-        setTimeout(() => {
+        // Use event-based approach to populate controls when model is loaded
+        viewer.onModelLoaded(() => {
             const animations = viewer.getAnimations();
             
             if (animations.length > 0) {
@@ -217,8 +217,10 @@
                 timeSlider.max = firstAnim.duration;
                 currentAnimSpan.textContent = firstAnim.name;
                 durationSpan.textContent = firstAnim.duration.toFixed(1) + 's';
+                
+                console.log('✅ Controls populated with animations');
             }
-        }, 1000);
+        });
 
         // Animation selection handler
         animationSelect.addEventListener('change', (e) => {
